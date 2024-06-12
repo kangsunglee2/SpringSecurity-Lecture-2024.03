@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<header th:replace="~{common/base :: head}"></header>
+	<script>
+		function uidClick(uid) {
+			$.ajax({
+				type: 'GET',
+				url: '/ss/user/detail/' + uid,
+				success: function(jsonUser) {
+					let user = JSON.parse(jsonUser);
+					$('#imgSrc').attr({src: user.picture});
+					$('#uid').val(user.uid);
+					$('#uid2').val(user.uid);
+					$('#hashedPwd').val(user.pwd);
+					$('#uname').val(user.uname);
+					$('#email').val(user.email);
+					$('#provider').val(user.provider);
+					$('#role').val(user.role);
+					$('#picture').val(user.picture);
+					$('#detailModal').modal('show');
+				}
+			});
+		}
+		function deleteUser() {
+			let uid = $('#uid').val();
+			const answer = confirm('정말로 삭제하시겠습니까?');
+			if (answer)
+				location.href = '/ss/user/delete/' + uid;
+		}
+	</script>
+</head>
+<body>
+	<div th:insert="~{common/base :: top}"></div>
+
+	<div class="container" style="margin-top:80px">
+		<div class="row">
+			<div class="col-3">
+				<aside th:replace="~{common/base :: aside}"></aside>
+			</div>
+
+			<div class="col-9">
+				<main id="main">
+					<h3><strong>사용자 목록</strong></h3>
+					<hr>
+					<table class="table">
+						<tr>
+							<th style="text-align: center;">프로필</th><th>UID</th><th>이름</th><th>Provider</th>
+							<th>이메일</th><th>등록일</th><th>역할</th>
+						</tr>
+						<tr th:each="user: ${userList}">
+							<td style="text-align: center;"><img th:src="${user.picture}" class="rounded-circle" height="28"></td>
+							<td>
+								<a href="#" th:onclick="uidClick([[${user.uid}]])">
+									<span th:text="${#strings.length(user.uid) > 11 ? #strings.substring(user.uid, 0, 10) + '...' : user.uid}"></span>
+								</a>
+							</td>
+							<td th:text="${user.uname}"></td>
+							<td th:text="${user.provider}"></td>
+							<td th:text="${user.email}"></td>
+							<td th:text="${user.regDate}"></td>
+							<td th:text="${user.role}"></td>
+						</tr>
+					</table>
+					<ul class="pagination justify-content-center mt-4">
+						<li class="page-item"><a class="page-link" th:href="@{/user/list/{p}(p=${page - 1 > 0 ? page - 1 : 1})}"><i class="fa-solid fa-less-than"></i></a></li>
+						<span th:each="page: ${pageList}">
+							<span th:if="${session.currentUserPage == page}">
+								<li class="page-item active">
+									<a class="page-link" href="#">[[${page}]]</a>
+								</li>
+							</span>
+							<span th:if="${session.currentUserPage != page}">
+								<li class="page-item">
+									<a class="page-link" th:href="@{/user/list/{x}(x=${page})}">[[${page}]]</a>
+								</li>
+							</span>
+						</span>
+						<li class="page-item"><a class="page-link" th:href="@{/user/list/{p}(p=${page + 1 > endPage ? endPage : page + 1})}"><i class="fa-solid fa-greater-than"></i></a></li>
+					</ul> 
+				</main>
+			</div>
+		</div>
+	</div>
+
+	<footer th:replace="~{common/base :: bottom}"></footer>
+	<div th:insert="~{user/user_modal :: modal}"></div>
+</body>
+</html>
